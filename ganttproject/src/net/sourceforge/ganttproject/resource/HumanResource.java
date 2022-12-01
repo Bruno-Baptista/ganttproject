@@ -220,6 +220,16 @@ public class HumanResource implements CustomPropertyHolder {
     return myAssignments.toArray(new ResourceAssignment[0]);
   }
 
+  public int getTotalAssignmentCompletion() {
+    int sum = 0;
+    for (int i = 0; i < myAssignments.size(); i++) {
+      sum += myAssignments.get(i).getTask().getCompletionPercentage();
+    }
+    if (sum == 0)   // in case there are currently no assignments the value displayed is 0
+      return sum;
+    return sum/myAssignments.size();    //average completion percentage
+  }
+
   public HumanResource unpluggedClone() {
     return new HumanResource(this);
   }

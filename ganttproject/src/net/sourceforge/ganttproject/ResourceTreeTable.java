@@ -87,16 +87,25 @@ public class ResourceTreeTable extends GPTreeTableBase {
 
   @Override
   public String getToolTipText(MouseEvent event) {
-      int column = columnAtPoint(event.getPoint());
-      if (column >= 0 && isHierarchical(column)) {
-          TreePath pathAtPoint = getTreeTable().getPathForLocation(event.getX(), event.getY());
-          TreeTableNode nodeAtPoint = pathAtPoint == null ? null : (TreeTableNode) pathAtPoint.getLastPathComponent();
-          if (nodeAtPoint instanceof AssignmentNode) {
-            Task task = ((AssignmentNode)nodeAtPoint).getTask();
-            return "<html><body>" + buildPath(task) + "</body></html>";
-          }
+    int column = columnAtPoint(event.getPoint());
+    if (column >= 0 && isHierarchical(column)) {
+      TreePath pathAtPoint = getTreeTable().getPathForLocation(event.getX(), event.getY());
+      TreeTableNode nodeAtPoint = pathAtPoint == null ? null : (TreeTableNode) pathAtPoint.getLastPathComponent();
+      if (nodeAtPoint instanceof AssignmentNode) {
+        Task task = ((AssignmentNode)nodeAtPoint).getTask();
+        return "<html><body>" + buildPath(task) + "</body></html>";
       }
-      return super.getToolTipText(event);
+      if (nodeAtPoint instanceof ResourceNode) {
+        HumanResource resource = ((ResourceNode) nodeAtPoint).getResource();
+        return resource.toString() + " | Total assignment completion: " + resource.getTotalAssignmentCompletion();
+      }
+    }
+      /*
+        In essence the super version of this method will always throw an NPE (for cases where there is no tooltip text),
+        hence, there is no exception treatment before
+
+       */
+    return super.getToolTipText(event);
   }
 
   private String buildPath(Task task) {
