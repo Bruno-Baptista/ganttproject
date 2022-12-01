@@ -132,6 +132,45 @@ public class TestResourceAssignments extends TestCase {
         assertTrue("It is expected that assignment is removed after sequential update+delete via mutator", resources.isEmpty());
     }
 
+    public void testTotalAssignmentCompletion() {
+        TaskManager taskManager = getTaskManager();
+        Task task1 = taskManager.createTask();
+        Task task2 = taskManager.createTask();
+        HumanResource res1 = getResourceManager().getById(1);
+        HumanResource res2 = getResourceManager().getById(2);
+        ResourceAssignment assignment1 = task1.getAssignmentCollection().addAssignment(res1);
+        ResourceAssignment assignment2 = task2.getAssignmentCollection().addAssignment(res1);
+
+        task1.setCompletionPercentage(75);
+        task2.setCompletionPercentage(25);
+
+        ResourceAssignment assignment3 = task1.getAssignmentCollection().addAssignment(res2);
+        ResourceAssignment assignment4 = task2.getAssignmentCollection().addAssignment(res2);
+
+        // test for resource 1 ((75+25)/2 = 50)
+        assertEquals(50, res1.getTotalAssignmentCompletion());
+        // test for resource 2 ((75+25)/2 = 50)
+        assertEquals(50, res2.getTotalAssignmentCompletion());
+
+        task1.setCompletionPercentage(0);
+        task2.setCompletionPercentage(25);
+
+        // test for resource 2 when average is truncated to become integer ((0+25)/2 = 12.5)
+        assertEquals(12, res2.getTotalAssignmentCompletion());
+
+        assignment1.delete();
+
+        // test for resource 1 when task 1 is deleted
+        assertEquals(25, res1.getTotalAssignmentCompletion());
+
+        assignment4.delete();
+
+        task1.setCompletionPercentage(100);
+
+        // test for resource 2 when task 2 is deleted and task 1 is fully completed
+        assertEquals(100, res2.getTotalAssignmentCompletion());
+    }
+
     private Set<HumanResource> extractResources(Task task) {
         Set<HumanResource> result = new HashSet<HumanResource>();
         ResourceAssignment[] assignments = task.getAssignments();
