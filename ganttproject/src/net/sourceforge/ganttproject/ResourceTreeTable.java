@@ -101,9 +101,8 @@ public class ResourceTreeTable extends GPTreeTableBase {
       }
     }
       /*
-        In essence the super version of this method will always throw an NPE (for cases where there is no tooltip text),
-        hence, there is no exception treatment before
-
+        The super version of this method is called when the toolTip is not requested from
+        an assignment (task) or a resource (i.e., resource role or null tooltip)
        */
     return super.getToolTipText(event);
   }
