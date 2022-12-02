@@ -29,6 +29,7 @@ import net.sourceforge.ganttproject.resource.AssignmentNode;
 import net.sourceforge.ganttproject.resource.HumanResource;
 import net.sourceforge.ganttproject.resource.ResourceNode;
 import net.sourceforge.ganttproject.task.Task;
+import net.sourceforge.ganttproject.task.TaskNode;
 import org.jdesktop.swingx.treetable.TreeTableNode;
 
 import javax.swing.*;
@@ -79,6 +80,21 @@ public class GanttTreeTable extends GPTreeTableBase {
         transferHandler.exportAsDrag(getTable(), e, TransferHandler.MOVE);
       }
     });
+  }
+
+  @Override
+  public String getToolTipText(MouseEvent event) {
+    int column = columnAtPoint(event.getPoint());
+    if (column >= 0 && isHierarchical(column)) {
+      TreePath pathAtPoint = getTreeTable().getPathForLocation(event.getX(), event.getY());
+      TreeTableNode nodeAtPoint = pathAtPoint == null ? null : (TreeTableNode) pathAtPoint.getLastPathComponent();
+      if (nodeAtPoint instanceof TaskNode) {
+        Task task = (Task) ((TaskNode) nodeAtPoint).getUserObject();
+        //return "<html><body>" + buildPath(task) + "</body></html>";
+        return task.getName() + " | Slack: " + task.getManager().getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(task);
+      }
+    }
+    return super.getToolTipText();
   }
 
   private UIFacade getUiFacade() {
