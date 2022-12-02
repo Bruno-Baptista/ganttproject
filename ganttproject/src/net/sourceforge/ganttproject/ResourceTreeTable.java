@@ -93,7 +93,8 @@ public class ResourceTreeTable extends GPTreeTableBase {
       TreeTableNode nodeAtPoint = pathAtPoint == null ? null : (TreeTableNode) pathAtPoint.getLastPathComponent();
       if (nodeAtPoint instanceof AssignmentNode) {
         Task task = ((AssignmentNode)nodeAtPoint).getTask();
-        return "<html><body>" + buildPath(task) + "</body></html>";
+        //return "<html><body>" + buildPath(task) + "</body></html>";
+        return task.getName() + " | Slack: " + task.getManager().getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(task);
       }
       if (nodeAtPoint instanceof ResourceNode) {
         HumanResource resource = ((ResourceNode) nodeAtPoint).getResource();

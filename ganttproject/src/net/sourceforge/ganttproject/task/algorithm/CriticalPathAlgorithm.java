@@ -26,4 +26,7 @@ public interface CriticalPathAlgorithm {
    *         many of them).
    */
   public Task[] getCriticalTasks();
+
+  public int getTaskSlack(Task task);
+
 }

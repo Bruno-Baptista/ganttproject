@@ -25,7 +25,11 @@ import net.sourceforge.ganttproject.chart.Chart;
 import net.sourceforge.ganttproject.chart.GanttChart;
 import net.sourceforge.ganttproject.gui.UIFacade;
 import net.sourceforge.ganttproject.language.GanttLanguage;
+import net.sourceforge.ganttproject.resource.AssignmentNode;
+import net.sourceforge.ganttproject.resource.HumanResource;
+import net.sourceforge.ganttproject.resource.ResourceNode;
 import net.sourceforge.ganttproject.task.Task;
+import org.jdesktop.swingx.treetable.TreeTableNode;
 
 import javax.swing.*;
 import javax.swing.event.TableColumnModelListener;

@@ -40,7 +40,7 @@ public class CriticalPathAlgorithmImpl implements CriticalPathAlgorithm {
   }
 
   static class Node {
-    private final Task task;
+    private Task task;
     private final List<Task> dependees = new ArrayList<Task>();
     private int numDependants;
     private final Date est;
@@ -91,10 +91,33 @@ public class CriticalPathAlgorithmImpl implements CriticalPathAlgorithm {
       return est.equals(lst);
     }
 
+    public int getSlack() {
+      if(lst == null || est == null) {
+        return -1;
+      }
+      long timeDiff = lst.getTime()- est.getTime();
+      int daysDiff = (int) (timeDiff/(1000*60*60*24));
+      return daysDiff;
+    }
+
     @Override
     public String toString() {
       return task == null ? "[Deadline node " + eft + "]" : task.toString();
     }
+  }
+
+  public int getTaskSlack(Task task) {
+    Task[] tasks = myTaskManager.getTasks();
+    Date projectEnd = myTaskManager.getProjectEnd();
+    Node fakeFinalNode = new Node(null, projectEnd, projectEnd, projectEnd, projectEnd, 0, null);
+    Map<Task, Node> task_node = createTaskNodeMap(tasks, fakeFinalNode);
+    Node target = task_node.get(task);
+    if(target == null){
+      return -2;
+    }
+    Processor p = new Processor(task_node, fakeFinalNode);
+    p.calculateLatestDates(target);
+    return target.getSlack();
   }
 
   @Override
@@ -166,10 +189,10 @@ public class CriticalPathAlgorithmImpl implements CriticalPathAlgorithm {
             if (nested.numDependants == 0) {
               newQueue.add(nested);
             }
-            if (curNode.isCritical()) {
+            //if (curNode.isCritical()) {
               nested.lft = curNode.lft;
               nested.lftFromSupertask = true;
-            }
+            //}
           }
 
           if (curNode.isCritical()) {
