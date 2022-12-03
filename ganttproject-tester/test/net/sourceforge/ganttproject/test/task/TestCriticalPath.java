@@ -22,8 +22,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import biz.ganttproject.core.calendar.WeekendCalendarImpl;
 import biz.ganttproject.core.time.GanttCalendar;
 import biz.ganttproject.core.time.CalendarFactory;
+import net.sourceforge.ganttproject.TestSetupHelper;
 import net.sourceforge.ganttproject.task.Task;
 import net.sourceforge.ganttproject.task.TaskManager;
 import net.sourceforge.ganttproject.task.TaskMutator;
@@ -90,8 +92,9 @@ public class TestCriticalPath extends TaskTestCase {
 
     public void testGetTaskSlack() {
         GanttCalendar start = CalendarFactory.createGanttCalendar(2022,11,5); // 05/12/2022
-        TaskManager mgr = getTaskManager();
-        mgr.getCalendar();
+        TaskManager withAlwaysWorkingCalendar = TestSetupHelper.newTaskManagerBuilder().build();
+        TaskManager withWeekendCalendar = TestSetupHelper.newTaskManagerBuilder().withCalendar(new WeekendCalendarImpl()).build();
+
         Task t1 = createTask(start, 1);
         Task t2 = createTask(start, 1);
         Task t3 = createTask(start, 1);
@@ -101,10 +104,10 @@ public class TestCriticalPath extends TaskTestCase {
         createDependency(t2, t1);
         createDependency(t3, t1);
 
-        int slack1 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
-        int slack2 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
-        int slack3 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
-        int slack4 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+        int slack1 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        int slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        int slack3 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        int slack4 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
         // Verifies that these tasks are in the critical path (slack = 0)
         assertEquals(0, slack1);
         assertEquals(0, slack2);
@@ -121,16 +124,16 @@ public class TestCriticalPath extends TaskTestCase {
         createDependency(t7, t5);
         createDependency(t6, t5);
 
-        slack1 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
-        slack2 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
-        slack3 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
-        slack4 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+        slack1 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack4 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
 
-        int slack5 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
-        int slack6 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
-        int slack7 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t7);
-        int slack8 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t8);
-        int slack9 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t9);
+        int slack5 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+        int slack6 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
+        int slack7 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t7);
+        int slack8 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t8);
+        int slack9 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t9);
 
 
         /*
