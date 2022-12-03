@@ -135,15 +135,23 @@ public class CriticalPathAlgorithmImpl implements CriticalPathAlgorithm {
   }
 
   public int getTaskSlack(Task task) {
-    Task[] tasks = myTaskManager.getTasks();
     Date projectEnd = myTaskManager.getProjectEnd();
     Node fakeFinalNode = new Node(null, projectEnd, projectEnd, projectEnd, projectEnd, 0, null);
+    Task[] tasks = myTaskManager.getTasks();
     Map<Task, Node> task_node = createTaskNodeMap(tasks, fakeFinalNode);
+
+    for (Node curNode : task_node.values()) {
+      curNode.numDependants += myTaskManager.getTaskHierarchy().getDepth(curNode.task) - 1;
+    }
+    assert fakeFinalNode.dependees.size() > 0;
+
     Node target = task_node.get(task);
+
     if(target == null){
       return -2;
     }
     Processor p = new Processor(task_node, fakeFinalNode);
+    p.run();
     p.calculateLatestDates(target);
     return target.getSlack();
   }

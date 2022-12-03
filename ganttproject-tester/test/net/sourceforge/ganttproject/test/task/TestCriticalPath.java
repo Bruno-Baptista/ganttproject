@@ -85,6 +85,25 @@ public class TestCriticalPath extends TaskTestCase {
         assertTrue(criticalTasks.contains(t4));
     }
 
+    public void testGetTaskSlack() {
+        TaskManager mgr = getTaskManager();
+        Task t1 = createTask();
+        Task t2 = createTask();
+        Task t3 = createTask();
+        Task t4 = createTask();
+        createDependency(t4, t2);
+        createDependency(t4, t3);
+        createDependency(t2, t1);
+        createDependency(t3, t1);
+
+        Set<Task> criticalTasks = new HashSet<Task>(Arrays.asList(
+                mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getCriticalTasks()));
+        assertTrue(criticalTasks.contains(t1));
+        assertTrue(criticalTasks.contains(t2));
+        assertTrue(criticalTasks.contains(t3));
+        assertTrue(criticalTasks.contains(t4));
+    }
+
     public void testUnlinkedTaskICriticalIfEndsAtTheProjectEnd() throws Exception {
         TaskManager mgr = getTaskManager();
         Task t1 = createTask();
