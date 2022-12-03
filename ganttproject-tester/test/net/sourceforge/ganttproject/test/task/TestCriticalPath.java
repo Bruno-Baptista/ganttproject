@@ -91,14 +91,14 @@ public class TestCriticalPath extends TaskTestCase {
     }
 
     public void testGetTaskSlack() {
-        GanttCalendar start = CalendarFactory.createGanttCalendar(2022,11,5); // 05/12/2022
         TaskManager withAlwaysWorkingCalendar = TestSetupHelper.newTaskManagerBuilder().build();
         TaskManager withWeekendCalendar = TestSetupHelper.newTaskManagerBuilder().withCalendar(new WeekendCalendarImpl()).build();
 
-        Task t1 = createTask(start, 1);
-        Task t2 = createTask(start, 1);
-        Task t3 = createTask(start, 1);
-        Task t4 = createTask(start, 1);
+        Task t1 = createTask();
+        GanttCalendar start = t1.getStart();
+        Task t2 = createTask();
+        Task t3 = createTask();
+        Task t4 = createTask();
         createDependency(t4, t2);
         createDependency(t4, t3);
         createDependency(t2, t1);
@@ -114,11 +114,11 @@ public class TestCriticalPath extends TaskTestCase {
         assertEquals(0, slack3);
         assertEquals(0, slack4);
 
-        Task t5 = createTask(start, 1);
-        Task t6 = createTask(start, 1);
-        Task t7 = createTask(start, 1);
-        Task t8 = createTask(start, 1);
-        Task t9 = createTask(start, 1);
+        Task t5 = createTask();
+        Task t6 = createTask();
+        Task t7 = createTask();
+        Task t8 = createTask();
+        Task t9 = createTask();
         createDependency(t9, t8);
         createDependency(t8, t7);
         createDependency(t7, t5);
