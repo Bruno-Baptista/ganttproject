@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import biz.ganttproject.core.time.GanttCalendar;
+import biz.ganttproject.core.time.CalendarFactory;
 import net.sourceforge.ganttproject.task.Task;
 import net.sourceforge.ganttproject.task.TaskManager;
 import net.sourceforge.ganttproject.task.TaskMutator;
@@ -29,6 +31,7 @@ import net.sourceforge.ganttproject.task.dependency.TaskDependency;
 import net.sourceforge.ganttproject.task.dependency.TaskDependencyConstraint;
 import net.sourceforge.ganttproject.task.dependency.constraint.FinishFinishConstraintImpl;
 import net.sourceforge.ganttproject.task.dependency.constraint.StartStartConstraintImpl;
+
 
 public class TestCriticalPath extends TaskTestCase {
     public void testSinglePathIsCritical() throws Exception {
@@ -86,22 +89,71 @@ public class TestCriticalPath extends TaskTestCase {
     }
 
     public void testGetTaskSlack() {
+        GanttCalendar start = CalendarFactory.createGanttCalendar(2022,11,5); // 05/12/2022
         TaskManager mgr = getTaskManager();
-        Task t1 = createTask();
-        Task t2 = createTask();
-        Task t3 = createTask();
-        Task t4 = createTask();
+        mgr.getCalendar();
+        Task t1 = createTask(start, 1);
+        Task t2 = createTask(start, 1);
+        Task t3 = createTask(start, 1);
+        Task t4 = createTask(start, 1);
         createDependency(t4, t2);
         createDependency(t4, t3);
         createDependency(t2, t1);
         createDependency(t3, t1);
 
-        Set<Task> criticalTasks = new HashSet<Task>(Arrays.asList(
-                mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getCriticalTasks()));
-        assertTrue(criticalTasks.contains(t1));
-        assertTrue(criticalTasks.contains(t2));
-        assertTrue(criticalTasks.contains(t3));
-        assertTrue(criticalTasks.contains(t4));
+        int slack1 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        int slack2 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        int slack3 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        int slack4 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+        // Verifies that these tasks are in the critical path (slack = 0)
+        assertEquals(0, slack1);
+        assertEquals(0, slack2);
+        assertEquals(0, slack3);
+        assertEquals(0, slack4);
+
+        Task t5 = createTask(start, 1);
+        Task t6 = createTask(start, 1);
+        Task t7 = createTask(start, 1);
+        Task t8 = createTask(start, 1);
+        Task t9 = createTask(start, 1);
+        createDependency(t9, t8);
+        createDependency(t8, t7);
+        createDependency(t7, t5);
+        createDependency(t6, t5);
+
+        slack1 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack4 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+
+        int slack5 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+        int slack6 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
+        int slack7 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t7);
+        int slack8 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t8);
+        int slack9 = mgr.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t9);
+
+
+        /*
+        Verifies that these tasks are not in the critical path anymore,
+        in total they take 3 days to complete minimum, while the new task is in the critical path
+         */
+        assertEquals(1, slack1);
+        assertEquals(1, slack2);
+        assertEquals(1, slack3);
+        assertEquals(1, slack4);
+        assertEquals(0, slack5);
+        assertEquals(0, slack5);
+        assertEquals(0, slack6);
+        assertEquals(0, slack7);
+        assertEquals(0, slack8);
+        assertEquals(0, slack9);
+
+        t9.delete();
+        assertEquals(0, slack1);
+        assertEquals(0, slack2);
+        //assertEquals(0 , sla);
+
+
     }
 
     public void testUnlinkedTaskICriticalIfEndsAtTheProjectEnd() throws Exception {

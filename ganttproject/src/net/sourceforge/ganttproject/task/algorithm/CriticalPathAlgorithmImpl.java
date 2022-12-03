@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package net.sourceforge.ganttproject.task.algorithm;
 
+import biz.ganttproject.core.calendar.AlwaysWorkingTimeCalendarImpl;
 import biz.ganttproject.core.calendar.GPCalendarCalc;
 import net.sourceforge.ganttproject.GPLogger;
 import net.sourceforge.ganttproject.task.Task;
@@ -120,9 +121,13 @@ public class CriticalPathAlgorithmImpl implements CriticalPathAlgorithm {
       do {
         //excluding start date
         startCal.add(Calendar.DAY_OF_MONTH, 1);
-        if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+        if (task.getManager().getCalendar() instanceof AlwaysWorkingTimeCalendarImpl) {
+          if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
           ++workDays;
+          }
         }
+        else  // Weekend Calendar
+          workDays++;
       } while (startCal.getTimeInMillis() < endCal.getTimeInMillis()); //excluding end date
 
       return workDays;
