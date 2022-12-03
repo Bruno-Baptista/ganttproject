@@ -92,6 +92,12 @@ public abstract class TaskTestCase extends TestCase {
       return result;
     }
 
+    protected Task createTask(int duration) {
+        Task result = createTask();
+        result.setDuration(getTaskManager().createLength(duration));
+        return result;
+    }
+
     protected TaskDependency createDependency(Task dependant, Task dependee) throws TaskDependencyException {
         return getTaskManager().getDependencyCollection().createDependency(dependant, dependee);
     }

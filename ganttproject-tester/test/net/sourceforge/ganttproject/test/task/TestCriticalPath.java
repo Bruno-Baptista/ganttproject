@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import biz.ganttproject.core.calendar.WeekendCalendarImpl;
-import biz.ganttproject.core.time.GanttCalendar;
-import biz.ganttproject.core.time.CalendarFactory;
 import net.sourceforge.ganttproject.TestSetupHelper;
 import net.sourceforge.ganttproject.task.Task;
 import net.sourceforge.ganttproject.task.TaskManager;
@@ -90,15 +88,15 @@ public class TestCriticalPath extends TaskTestCase {
         assertTrue(criticalTasks.contains(t4));
     }
 
-    public void testGetTaskSlack() {
+    public void testGetTaskSlackWithAlwaysWorkingCalendar() {
         TaskManager withAlwaysWorkingCalendar = TestSetupHelper.newTaskManagerBuilder().build();
-        TaskManager withWeekendCalendar = TestSetupHelper.newTaskManagerBuilder().withCalendar(new WeekendCalendarImpl()).build();
+        // Test with always working calendar
+        setTaskManager(withAlwaysWorkingCalendar);
 
         Task t1 = createTask();
-        GanttCalendar start = t1.getStart();
         Task t2 = createTask();
         Task t3 = createTask();
-        Task t4 = createTask();
+        Task t4 = createTask(10);
         createDependency(t4, t2);
         createDependency(t4, t3);
         createDependency(t2, t1);
@@ -108,6 +106,7 @@ public class TestCriticalPath extends TaskTestCase {
         int slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
         int slack3 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
         int slack4 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+
         // Verifies that these tasks are in the critical path (slack = 0)
         assertEquals(0, slack1);
         assertEquals(0, slack2);
@@ -115,14 +114,6 @@ public class TestCriticalPath extends TaskTestCase {
         assertEquals(0, slack4);
 
         Task t5 = createTask();
-        Task t6 = createTask();
-        Task t7 = createTask();
-        Task t8 = createTask();
-        Task t9 = createTask();
-        createDependency(t9, t8);
-        createDependency(t8, t7);
-        createDependency(t7, t5);
-        createDependency(t6, t5);
 
         slack1 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
         slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
@@ -130,33 +121,171 @@ public class TestCriticalPath extends TaskTestCase {
         slack4 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
 
         int slack5 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
-        int slack6 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
-        int slack7 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t7);
-        int slack8 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t8);
-        int slack9 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t9);
-
 
         /*
         Verifies that these tasks are not in the critical path anymore,
-        in total they take 3 days to complete minimum, while the new task is in the critical path
+        in total they take 12 days to complete minimum, while the new task is in the critical path
          */
-        assertEquals(1, slack1);
-        assertEquals(1, slack2);
-        assertEquals(1, slack3);
-        assertEquals(1, slack4);
-        assertEquals(0, slack5);
-        assertEquals(0, slack5);
-        assertEquals(0, slack6);
-        assertEquals(0, slack7);
-        assertEquals(0, slack8);
-        assertEquals(0, slack9);
-
-        t9.delete();
         assertEquals(0, slack1);
         assertEquals(0, slack2);
-        //assertEquals(0 , sla);
+        assertEquals(0, slack3);
+        assertEquals(0, slack4);
+        assertEquals(11, slack5);
 
 
+        Task t6 = createTask(15);
+        createDependency(t6, t5);
+
+        slack1 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack4 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+        slack5 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+        int slack6 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
+
+        /*
+        Verifies that the first 4 tasks are not in the critical path anymore,
+        in total they take 12 days to complete minimum, while the task 5 and 6 combined take 16 days
+         */
+        assertEquals(4, slack1);
+        assertEquals(4, slack2);
+        assertEquals(4, slack3);
+        assertEquals(4, slack4);
+        assertEquals(0, slack5);
+        assertEquals(0, slack6);
+
+        withAlwaysWorkingCalendar.deleteTask(t4);
+
+        slack1 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack5 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+        slack6 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
+
+        /*
+        Verify slack change after deleting task
+         */
+        assertEquals(14, slack1);
+        assertEquals(14, slack2);
+        assertEquals(14, slack3);
+        assertEquals(0, slack5);
+        assertEquals(0, slack6);
+
+        withAlwaysWorkingCalendar.deleteTask(t6);
+
+        slack1 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack5 = withAlwaysWorkingCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+
+        /*
+        Verify slack change after deleting critical task
+         */
+        assertEquals(0, slack1);
+        assertEquals(0, slack2);
+        assertEquals(0, slack3);
+        assertEquals(1, slack5);
+    }
+
+    public void testGetTaskSlackWithWeekendCalendar() {
+        TaskManager withWeekendCalendar = TestSetupHelper.newTaskManagerBuilder().withCalendar(new WeekendCalendarImpl()).build();
+
+        //Test with weekend calendar
+        setTaskManager(withWeekendCalendar);
+
+
+        Task t1 = createTask();
+        Task t2 = createTask();
+        Task t3 = createTask();
+        Task t4 = createTask(10);
+        createDependency(t4, t2);
+        createDependency(t4, t3);
+        createDependency(t2, t1);
+        createDependency(t3, t1);
+
+        int slack1 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        int slack2 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        int slack3 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        int slack4 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+
+        // Verifies that these tasks are in the critical path (slack = 0)
+        assertEquals(0, slack1);
+        assertEquals(0, slack2);
+        assertEquals(0, slack3);
+        assertEquals(0, slack4);
+
+        Task t5 = createTask();
+
+        slack1 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack4 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+
+        int slack5 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+
+        /*
+        Verifies that these tasks are not in the critical path anymore,
+        in total they take 12 days to complete minimum, while the new task is in the critical path
+         */
+        assertEquals(0, slack1);
+        assertEquals(0, slack2);
+        assertEquals(0, slack3);
+        assertEquals(0, slack4);
+        assertEquals(11, slack5);
+
+
+        Task t6 = createTask(15);
+        createDependency(t6, t5);
+
+        slack1 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack4 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t4);
+        slack5 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+        int slack6 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
+
+        /*
+        Verifies that the first 4 tasks are not in the critical path anymore,
+        in total they take 12 days to complete minimum, while the task 5 and 6 combined take 16 days
+         */
+        assertEquals(4, slack1);
+        assertEquals(4, slack2);
+        assertEquals(4, slack3);
+        assertEquals(4, slack4);
+        assertEquals(0, slack5);
+        assertEquals(0, slack6);
+
+        withWeekendCalendar.deleteTask(t4);
+
+        slack1 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack5 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+        slack6 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t6);
+
+        /*
+        Verify slack change after deleting task
+         */
+        assertEquals(14, slack1);
+        assertEquals(14, slack2);
+        assertEquals(14, slack3);
+        assertEquals(0, slack5);
+        assertEquals(0, slack6);
+
+        withWeekendCalendar.deleteTask(t6);
+
+        slack1 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t1);
+        slack2 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t2);
+        slack3 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t3);
+        slack5 = withWeekendCalendar.getAlgorithmCollection().getCriticalPathAlgorithm().getTaskSlack(t5);
+
+        /*
+        Verify slack change after deleting critical task
+         */
+        assertEquals(0, slack1);
+        assertEquals(0, slack2);
+        assertEquals(0, slack3);
+        assertEquals(1, slack5);
     }
 
     public void testUnlinkedTaskICriticalIfEndsAtTheProjectEnd() throws Exception {
