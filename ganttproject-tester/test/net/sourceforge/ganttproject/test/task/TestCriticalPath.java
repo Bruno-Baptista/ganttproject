@@ -248,7 +248,7 @@ public class TestCriticalPath extends TaskTestCase {
         Verifies that the first 4 tasks are not in the critical path anymore,
         in total they take 12 days to complete minimum (not counting weekends), while the task 5 and 6 combined take 16 days (not counting weekends)
          */
-        //assertEquals(6, slack1);
+        //assertEquals(6, slack1);  // Expected value is 6, but the actual value we get is 4. Likely to be a bug from the application
         assertEquals(6, slack2);
         assertEquals(6, slack3);
         assertEquals(6, slack4);
@@ -266,7 +266,7 @@ public class TestCriticalPath extends TaskTestCase {
         /*
         Verify slack change after deleting task
          */
-        //assertEquals(20, slack1);
+        //assertEquals(20, slack1); // Expected value is 20, but the actual value we get is 18. Likely to be a bug from the application
         assertEquals(20, slack2);
         assertEquals(20, slack3);
         assertEquals(0, slack5);
